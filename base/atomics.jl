@@ -207,7 +207,12 @@ function alignment{T}(::Type{T})
     # types, with the following exceptions: On 32- and 64-bit x86 platforms
     # and on 64-bit SPARC platforms, atomic types of size 1, 2, 4, 8 or 16 -byte
     # have the alignment that matches the size.
-    if Sys.ARCH === :x86_64 || Sys.ARCH === :i686
+    #
+    # Note for PPC:
+    # The OpenPower ABI for Linux Supplement -- 64-Bit ELF V2 ABI Specification
+    # defines that the alignments of types is sizeof(T).
+    if Sys.ARCH === :x86_64 || Sys.ARCH === :i686 ||
+       Sys.ARCH === :ppc64le || Sys.ARCH === :powerpc64le
         return sizeof(T)
     end
     return WORD_SIZE ÷ 8
