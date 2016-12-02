@@ -202,21 +202,8 @@ inttype(::Type{Float16}) = Int16
 inttype(::Type{Float32}) = Int32
 inttype(::Type{Float64}) = Int64
 
-function alignment{T}(::Type{T})
-    # Atomic types assume the same alignment with the corresponding non-atomic
-    # types, with the following exceptions: On 32- and 64-bit x86 platforms
-    # and on 64-bit SPARC platforms, atomic types of size 1, 2, 4, 8 or 16 -byte
-    # have the alignment that matches the size.
-    #
-    # Note for PPC:
-    # The OpenPower ABI for Linux Supplement -- 64-Bit ELF V2 ABI Specification
-    # defines that the alignments of types is sizeof(T).
-    if Sys.ARCH === :x86_64 || Sys.ARCH === :i686 ||
-       Sys.ARCH === :ppc64le || Sys.ARCH === :powerpc64le
-        return sizeof(T)
-    end
-    return WORD_SIZE ÷ 8
-end
+
+alignment{T}(::Type{T}) = ccall(:jl_alignment, Cint, (Csize_t,), sizeof(T))
 
 # All atomic operations have acquire and/or release semantics, depending on
 # whether the load or store values. Most of the time, this is what one wants
